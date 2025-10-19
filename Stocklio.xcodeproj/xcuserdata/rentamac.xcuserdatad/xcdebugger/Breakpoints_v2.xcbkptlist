@@ -3,4 +3,108 @@
    uuid = "531D950A-ABBE-40BE-B36D-31A836B607EE"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Stocklio/AccountingElement/CashElement.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "5"
+            endingLineNumber = "5"
+            landmarkName = "CashElement"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - 6b77b58d42ae3379"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.__allocating_init() -&gt; Stocklio.CashElement"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - 3940b79f61c43658"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.init() -&gt; Stocklio.CashElement"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - dc5df004c1652cd5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.__ivar_destroyer"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - 8a1e8087b9087e52"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.deinit"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - e4f284d61fe8f382"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.__isolated_deallocating_deinit"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "25127D3A-336F-43D4-8135-8DCE1B87F9DC - 30ed9e002d727a4f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Stocklio.CashElement.__deallocating_deinit"
+                  moduleName = "Stocklio.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rentamac/Stocklio/Stocklio/AccountingElement/CashElement.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

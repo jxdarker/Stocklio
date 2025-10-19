@@ -1,32 +1,30 @@
+import Foundation
 import SwiftUI
-import SwiftData
+import Combine
 
-class AccountingElementBase : Identifiable{
-    var timestamp: Date
-    var accountName: String
-    var currency: Currency
+class AccountingElementBase: ObservableObject, Identifiable {
+    @Published var timestamp: Date
+    @Published var accountName: String
+    @Published var currency: Currency
+    
+    let id = UUID()
     
     init() {
         self.timestamp = Date()
-        self.accountName = "Unidentified"
-        self.currency = .TWD
+        self.accountName = ""
+        self.currency = .USD
     }
     
-    // 創建列表視圖
+    // 非同步版本（推薦使用）
+    func getBalanceAsync(currency: Currency) async -> Double {
+        return 0.0 // 子類別需要覆寫
+    }
+    
     func GetListView() -> AnyView {
         return AnyView(EmptyView())
     }
-
-    // 創建詳情視圖
+    
     func GetDetailView() -> AnyView {
         return AnyView(EmptyView())
-    }
-
-    func GetBalance(currency:Currency) -> Double {
-        return Double.nan
-    }
-    
-    func GetBalance() -> Double {
-        return GetBalance(currency: self.currency)
     }
 }

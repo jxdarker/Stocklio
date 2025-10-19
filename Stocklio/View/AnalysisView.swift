@@ -4,6 +4,9 @@ import Charts
 struct AnalysisView: View {
     let items: [AccountingElementBase]
     @State private var selectedTimeRange: TimeRange = .oneMonth
+    @State private var totalValue: Double = 0.0
+    @State private var itemBalances: [UUID: Double] = [:]
+    @State private var isLoading = false
     
     enum TimeRange: String, CaseIterable {
         case oneMonth = "1個月"
@@ -37,19 +40,52 @@ struct AnalysisView: View {
                 .padding()
             }
             .navigationTitle("投資分析")
+            .task {
+                await loadAllBalances()
+            }
+            .refreshable {
+                await loadAllBalances()
+            }
         }
     }
     
-    // 計算所有股票項目 - 修正：不需要 filter balance
+    // 計算所有股票項目
     private var stockItems: [AccountingElementBase] {
         items.compactMap { $0 as? StockElement }
     }
     
-    // 計算總資產價值 - 使用 GetBalance
-    private var totalValue: Double {
-        items.reduce(0.0) { result, item in
-            result + item.GetBalance(currency: .TWD) // 使用基準貨幣計算總值
+    // 載入所有餘額
+    private func loadAllBalances() async {
+        isLoading = true
+        
+        // 使用 TaskGroup 並行加載所有餘額
+        let balances = await withTaskGroup(of: (UUID, Double).self) { group in
+            for item in items {
+                group.addTask {
+                    let balance = await item.getBalanceAsync(currency: .TWD) // 使用基準貨幣計算總值
+                    return (item.id, balance)
+                }
+            }
+            
+            var results: [UUID: Double] = [:]
+            for await (id, balance) in group {
+                results[id] = balance
+            }
+            return results
         }
+        
+        let total = balances.values.reduce(0.0, +)
+        
+        await MainActor.run {
+            itemBalances = balances
+            totalValue = total
+            isLoading = false
+        }
+    }
+    
+    // 獲取單個項目的餘額
+    private func getItemBalance(_ item: AccountingElementBase) -> Double {
+        return itemBalances[item.id] ?? 0.0
     }
     
     // 生成模擬的歷史數據
@@ -98,16 +134,19 @@ struct AnalysisView: View {
                     description: Text("請先添加投資項目")
                 )
                 .frame(height: 200)
+            } else if isLoading {
+                ProgressView("載入中...")
+                    .frame(height: 200)
             } else {
                 Chart(items) { item in
                     SectorMark(
-                        angle: .value("金額", item.GetBalance(currency: .TWD)),
+                        angle: .value("金額", getItemBalance(item)),
                         innerRadius: .ratio(0.5),
                         angularInset: 1.5
                     )
                     .foregroundStyle(by: .value("資產", item.accountName))
                     .annotation(position: .overlay) {
-                        let itemBalance = item.GetBalance(currency: .TWD)
+                        let itemBalance = getItemBalance(item)
                         let percentage = totalValue > 0 ? (itemBalance / totalValue) * 100 : 0
                         if percentage > 5 {
                             Text("\(percentage, specifier: "%.0f")%")

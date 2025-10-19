@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-final class StockElement: AccountingElementBase, ObservableObject {
+final class StockElement: AccountingElementBase {
     @Published var price: Double // 當前股價
     var shares: Double // 股數
     var symbol: String // 股票代碼
@@ -14,28 +14,57 @@ final class StockElement: AccountingElementBase, ObservableObject {
         super.init()
         self.timestamp = timestamp
         self.accountName = accountName
+        self.currency = .USD // 預設貨幣
     }
     
-    override func GetBalance(currency: Currency) -> Double {
-        return Currency.convert(amount: shares * price, from: self.currency, to: currency)
+    // 非同步版本
+    override func getBalanceAsync(currency: Currency) async -> Double {
+        let totalValue = shares * price
+        if self.currency == currency {
+            return totalValue
+        }
+        
+        let convertedAmount = await Currency.convert(
+            amount: totalValue,
+            from: self.currency,
+            to: currency
+        )
+        
+        return convertedAmount > 0 ? convertedAmount : totalValue
     }
     
     override func GetListView() -> AnyView {
-        AnyView(
-            StockListView(element: self)
-        )
+        AnyView(StockListView(element: self))
     }
     
     override func GetDetailView() -> AnyView {
-        AnyView(
-            StockDetailView(element: self)
-        )
+        AnyView(StockDetailView(element: self))
+    }
+    
+    // 重新加載股價
+    func refreshPrice() async {
+        await loadStockPrice()
+    }
+    
+    // 私有方法：加載股價
+    private func loadStockPrice() async {
+        let result = await Utilities.fetchStockCurrentPrice(symbol: symbol)
+        
+        await MainActor.run {
+            self.price = result.price
+            self.currency = result.currency
+            self.objectWillChange.send()
+            print("✅ 股票資料加載完成: \(symbol) 價格=\(result.price) 貨幣=\(result.currency.rawValue)")
+        }
     }
 }
 
 struct StockListView: View {
     @ObservedObject var element: StockElement
     @State private var isLoading = false
+    @State private var displayPrice: Double = 0.0
+    @State private var displayCurrency: Currency = .USD
+    @State private var displayBalance: Double = 0.0
     
     var body: some View {
         HStack {
@@ -58,13 +87,13 @@ struct StockListView: View {
                     ProgressView()
                         .scaleEffect(0.8)
                 } else {
-                    Text("$\(element.GetBalance(currency: element.currency), specifier: "%.2f")")
+                    Text("\(displayCurrency.symbol)\(displayBalance, specifier: "%.2f")")
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(element.GetBalance(currency: element.currency) >= 0 ? .primary : .red)
+                        .foregroundColor(displayBalance >= 0 ? .primary : .red)
                     
-                    if element.price > 0 {
-                        Text("$\(element.price, specifier: "%.2f")/股 • \(element.currency.rawValue)")
+                    if displayPrice > 0 {
+                        Text("\(displayCurrency.symbol)\(displayPrice, specifier: "%.2f")/股 • \(displayCurrency.rawValue)")
                             .font(.caption2)
                             .foregroundColor(.green)
                     } else {
@@ -78,21 +107,28 @@ struct StockListView: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 4)
         .task {
-            await loadStockPrice()
+            await loadData()
         }
     }
     
-    private func loadStockPrice() async {
-        // 只有當還沒有股價時才加載
-        if element.price == 0 {
-            isLoading = true
-            let result = await Utilities.fetchStockCurrentPrice(symbol: element.symbol)
-            
-            await MainActor.run {
-                element.price = result.price
-                element.currency = result.currency // 更新貨幣資訊
-                isLoading = false
-            }
+    private func loadData() async {
+        isLoading = true
+        
+        // 加載股價
+        await element.refreshPrice()
+        
+        // 更新顯示資料
+        await MainActor.run {
+            displayPrice = element.price
+            displayCurrency = element.currency
+        }
+        
+        // 計算餘額
+        let balance = await element.getBalanceAsync(currency: element.currency)
+        
+        await MainActor.run {
+            displayBalance = balance
+            isLoading = false
         }
     }
 }
@@ -101,6 +137,9 @@ struct StockListView: View {
 struct StockDetailView: View {
     @ObservedObject var element: StockElement
     @State private var isLoading = false
+    @State private var displayPrice: Double = 0.0
+    @State private var displayCurrency: Currency = .USD
+    @State private var displayBalance: Double = 0.0
     
     var body: some View {
         VStack(spacing: 20) {
@@ -115,7 +154,7 @@ struct StockDetailView: View {
                     .foregroundColor(.blue)
                     .fontWeight(.medium)
                 
-                Text("貨幣: \(element.currency.rawValue)")
+                Text("貨幣: \(displayCurrency.rawValue)")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -131,9 +170,9 @@ struct StockDetailView: View {
                     ProgressView()
                         .scaleEffect(1.2)
                 } else {
-                    Text("$\(element.GetBalance(), specifier: "%.2f")")
-                        .font(.system(size: 52, weight: .bold, design: .rounded))
-                        .foregroundColor(element.GetBalance() >= 0 ? .primary : .red)
+                    Text("\(displayCurrency.symbol)\(displayBalance, specifier: "%.2f")")
+                        .font(.system(size: 42, weight: .bold, design: .rounded))
+                        .foregroundColor(displayBalance >= 0 ? .primary : .red)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -157,8 +196,8 @@ struct StockDetailView: View {
                     Text("當前股價")
                         .foregroundColor(.secondary)
                     Spacer()
-                    if element.price > 0 {
-                        Text("$\(element.price, specifier: "%.2f") \(element.currency.rawValue)")
+                    if displayPrice > 0 {
+                        Text("\(displayCurrency.symbol)\(displayPrice, specifier: "%.2f") \(displayCurrency.rawValue)")
                             .fontWeight(.medium)
                             .foregroundColor(.green)
                     } else {
@@ -172,7 +211,7 @@ struct StockDetailView: View {
                     Text("貨幣")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(element.currency.rawValue)
+                    Text(displayCurrency.rawValue)
                         .fontWeight(.medium)
                 }
                 
@@ -193,7 +232,7 @@ struct StockDetailView: View {
             // 更新按鈕
             Button("更新股價") {
                 Task {
-                    await updatePrice()
+                    await refreshPrice()
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -204,23 +243,48 @@ struct StockDetailView: View {
         .padding()
         .navigationTitle("股票詳情")
         .task {
-            await loadStockPrice()
+            await loadData()
         }
     }
     
-    private func loadStockPrice() async {
-        if element.price == 0 {
-            await updatePrice()
-        }
-    }
-    
-    private func updatePrice() async {
+    private func loadData() async {
         isLoading = true
-        let result = await Utilities.fetchStockCurrentPrice(symbol: element.symbol)
+        
+        // 如果還沒有價格，加載股價
+        if element.price == 0 {
+            await element.refreshPrice()
+        }
+        
+        // 更新顯示資料
+        await MainActor.run {
+            displayPrice = element.price
+            displayCurrency = element.currency
+        }
+        
+        // 計算餘額
+        let balance = await element.getBalanceAsync(currency: element.currency)
         
         await MainActor.run {
-            element.price = result.price
-            element.currency = result.currency // 更新貨幣資訊
+            displayBalance = balance
+            isLoading = false
+        }
+    }
+    
+    private func refreshPrice() async {
+        isLoading = true
+        await element.refreshPrice()
+        
+        // 更新顯示資料
+        await MainActor.run {
+            displayPrice = element.price
+            displayCurrency = element.currency
+        }
+        
+        // 重新計算餘額
+        let balance = await element.getBalanceAsync(currency: element.currency)
+        
+        await MainActor.run {
+            displayBalance = balance
             isLoading = false
         }
     }

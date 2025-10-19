@@ -4,6 +4,8 @@ import SwiftUI
 struct MainApp: App {
     @State var items: [AccountingElementBase] = []
     
+    static var stockPriceCache: [String: (price: Double, currency:Currency)] = [:]
+    static var exchangeRateCache: [String: Double] = [:] // key: "USD-TWD"
     var body: some Scene {
         WindowGroup {
             ContentView(items: $items) 

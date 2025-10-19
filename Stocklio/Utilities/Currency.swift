@@ -15,19 +15,67 @@ enum Currency: String, CaseIterable {
         }
     }
     
-    var exchangeRate: Double {
-        // 這裡可以設定匯率，實際應用中應該從網路獲取
-        switch self {
-        case .TWD: return 1.0
-        case .USD: return 31.0  // 1 USD = 31 TWD
-        case .JPY: return 0.22  // 1 JPY = 0.22 TWD
-        case .EUR: return 34.0  // 1 EUR = 34 TWD
-        case .CNY: return 4.3   // 1 CNY = 4.3 TWD
+    // 非同步貨幣轉換
+    static func convert(
+        amount: Double,
+        from sourceCurrency: Currency,
+        to targetCurrency: Currency,
+        useCache: Bool = true,
+        success: ((Double) -> Void)? = nil,
+        failure: (() -> Void)? = nil
+    ) async -> Double {
+        
+        if sourceCurrency == targetCurrency {
+            success?(amount)
+            return amount
+        }
+        
+        // 直接獲取兩種貨幣間的匯率
+        let rate = await Utilities.fetchExchangeRate(
+            from: sourceCurrency,
+            to: targetCurrency,
+            useCache: useCache,
+            success: { rate in
+                let result = amount * rate
+                success?(result)
+            },
+            failure: {
+                failure?()
+            }
+        )
+        
+        if rate > 0 {
+            let result = amount * rate
+            return result
+        } else {
+            failure?()
+            return 0.0
         }
     }
     
-    static func convert(amount: Double, from sourceCurrency: Currency, to targetCurrency: Currency) -> Double {
-        let rateRatio = targetCurrency.exchangeRate / sourceCurrency.exchangeRate
-        return amount * rateRatio
+    // 獲取對另一種貨幣的匯率
+    func exchangeRate(
+        to targetCurrency: Currency,
+        useCache: Bool = true,
+        success: ((Double) -> Void)? = nil,
+        failure: (() -> Void)? = nil
+    ) async -> Double {
+        
+        if self == targetCurrency {
+            success?(1.0)
+            return 1.0
+        }
+        
+        return await Utilities.fetchExchangeRate(
+            from: self,
+            to: targetCurrency,
+            useCache: useCache,
+            success: { rate in
+                success?(rate)
+            },
+            failure: {
+                failure?()
+            }
+        )
     }
 }

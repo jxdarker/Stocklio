@@ -6,6 +6,7 @@ struct AddCashView: View {
     
     @State private var accountName = ""
     @State private var balance = ""
+    @State private var selectedCurrency: Currency = .USD
     @State private var showAlert = false
     
     private let numberFormatter: NumberFormatter = {
@@ -27,9 +28,31 @@ struct AddCashView: View {
                         .onChange(of: balance) { oldValue, newValue in
                             validateNumericInput(newValue)
                         }
+                    
+                    Picker("货币", selection: $selectedCurrency) {
+                        ForEach(Currency.allCases, id: \.self) { currency in
+                            HStack {
+                                Text(currency.rawValue)
+                                Text(currency.symbol)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(currency)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                Section(header: Text("预览")) {
+                    HStack {
+                        Text("金额显示")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(selectedCurrency.symbol)\(getPreviewBalance())")
+                            .fontWeight(.medium)
+                    }
                 }
             }
-            .navigationTitle("添加账户")
+            .navigationTitle("添加现金账户")
             .navigationBarItems(
                 leading: Button("取消") {
                     dismiss()
@@ -64,7 +87,6 @@ struct AddCashView: View {
             balance = input
         } else {
             // 如果無效，恢復到上次的有效值
-            // 這裡簡單處理，可以根據需要調整
             let filtered = input.filter { "0123456789.".contains($0) }
             let components = filtered.components(separatedBy: ".")
             if components.count <= 2 {
@@ -77,17 +99,24 @@ struct AddCashView: View {
         return numberFormatter.number(from: balance) != nil
     }
     
+    private func getPreviewBalance() -> String {
+        guard let number = numberFormatter.number(from: balance) else {
+            return "0.00"
+        }
+        return String(format: "%.2f", number.doubleValue)
+    }
+    
     private func saveItem() {
         if let number = numberFormatter.number(from: balance) {
             let newItem = CashElement(
                 accountName: accountName,
                 balance: number.doubleValue
             )
+            newItem.currency = selectedCurrency // 設定貨幣
             onAddItem(newItem)
         }
     }
 }
-
 
 #Preview {
     AddCashView()
