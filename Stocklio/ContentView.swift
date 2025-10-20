@@ -1,22 +1,23 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Binding var items: [AccountingElementBase]  // 接收 Binding
+    @Binding var items: [AccountingElementBase]
+    @Binding var groups: [Group]
     @State private var selectedTab = 0
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainView(items: $items)  // 繼續傳遞給 MainView
+            MainView(items: $items)
                 .tabItem {
                     Image(systemName: "dollarsign.circle")
                     Text("賬戶")
                 }
                 .tag(0)
             
-            AnalysisView(items: items)  // 傳遞給 AnalysisView（不需要 Binding）
+            GroupView(items: items, groups: $groups)
                 .tabItem {
-                    Image(systemName: "chart.bar")
-                    Text("分析")
+                    Image(systemName: "chart.pie")
+                    Text("組合")
                 }
                 .tag(1)
             
@@ -31,5 +32,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(items: .constant([]))
+    ContentView(items: .constant([]), groups: .constant([]))
 }

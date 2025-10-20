@@ -4,11 +4,13 @@ import Combine
 
 final class StockElement: AccountingElementBase {
     @Published var price: Double // 當前股價
+    @Published var costPrice: Double // 成本價
     var shares: Double // 股數
     var symbol: String // 股票代碼
     
-    init(timestamp: Date = Date(), accountName: String = "", shares: Double = 0.0, symbol: String = "") {
+    init(timestamp: Date = Date(), accountName: String = "", shares: Double = 0.0, symbol: String = "", costPrice: Double = 0.0) {
         self.price = 0.0
+        self.costPrice = costPrice
         self.shares = shares
         self.symbol = symbol
         super.init()
@@ -17,7 +19,6 @@ final class StockElement: AccountingElementBase {
         self.currency = .USD // 預設貨幣
     }
     
-    // 非同步版本
     override func getBalanceAsync(currency: Currency) async -> Double {
         let totalValue = shares * price
         if self.currency == currency {
@@ -31,6 +32,22 @@ final class StockElement: AccountingElementBase {
         )
         
         return convertedAmount > 0 ? convertedAmount : totalValue
+    }
+    
+    // 成本價值（新增方法）
+    func getCostBalanceAsync(currency: Currency) async -> Double {
+        let totalCost = shares * costPrice
+        if self.currency == currency {
+            return totalCost
+        }
+        
+        let convertedAmount = await Currency.convert(
+            amount: totalCost,
+            from: self.currency,
+            to: currency
+        )
+        
+        return convertedAmount > 0 ? convertedAmount : totalCost
     }
     
     override func GetListView() -> AnyView {
@@ -58,6 +75,7 @@ final class StockElement: AccountingElementBase {
         }
     }
 }
+
 
 struct StockListView: View {
     @ObservedObject var element: StockElement
@@ -182,7 +200,6 @@ struct StockDetailView: View {
                     .fill(Color(.systemGray6))
             )
             
-            // 持股詳情
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("持股數量")
@@ -208,6 +225,15 @@ struct StockDetailView: View {
                 }
                 
                 HStack {
+                    Text("成本股價")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(displayCurrency.symbol)\(element.costPrice, specifier: "%.2f") \(displayCurrency.rawValue)")
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                }
+                
+                HStack {
                     Text("貨幣")
                         .foregroundColor(.secondary)
                     Spacer()
@@ -223,6 +249,7 @@ struct StockDetailView: View {
                         .fontWeight(.medium)
                 }
             }
+
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 8)

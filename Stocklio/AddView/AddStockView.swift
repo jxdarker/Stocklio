@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct AddStockView: View {
     @Environment(\.dismiss) var dismiss
@@ -6,7 +7,17 @@ struct AddStockView: View {
     
     @State private var accountName = ""
     @State private var shares = ""
+    @State private var costPrice = ""
     @State private var symbol = ""
+    
+    private let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 0
+        return formatter
+    }()
+
     
     var body: some View {
         NavigationView {
@@ -26,6 +37,9 @@ struct AddStockView: View {
                                 shares = oldValue
                             }
                         }
+                    TextField("成本價", text: $costPrice) // 新增
+                        .keyboardType(.decimalPad)
+
                 }
             }
             .navigationTitle("添加股票")
@@ -43,11 +57,13 @@ struct AddStockView: View {
     }
     
     private func saveItem() {
-        if let sharesValue = Double(shares) {
+        if let sharesNumber = numberFormatter.number(from: shares),
+           let costPriceNumber = numberFormatter.number(from: costPrice) {
             let newItem = StockElement(
                 accountName: accountName,
-                shares: sharesValue,
-                symbol: symbol.uppercased()
+                shares: sharesNumber.doubleValue,
+                symbol: symbol,
+                costPrice: costPriceNumber.doubleValue // 新增
             )
             onAddItem(newItem)
         }
