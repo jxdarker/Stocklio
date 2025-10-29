@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct MainApp: App {
     
-    @State private var groups: [Group] = []
+    @State private var groups: [AccountingGroup] = []
     @State var items: [AccountingElementBase] = []
     
     static var stockPriceCache: [String: (price: Double, currency:Currency)] = [:]

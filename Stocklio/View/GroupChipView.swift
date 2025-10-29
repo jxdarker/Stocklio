@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GroupChipView: View {
-    let group: Group
+    let group: AccountingGroup
     let isSelected: Bool
     let onTap: () -> Void
     

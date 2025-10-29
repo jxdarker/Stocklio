@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Binding var items: [AccountingElementBase]
-    @Binding var groups: [Group]
+    @Binding var groups: [AccountingGroup]
     @State private var selectedTab = 0
     
     var body: some View {

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddItemToGroupView: View {
     @Environment(\.dismiss) var dismiss
-    @ObservedObject var group: Group  // 正確使用 @ObservedObject
+    @ObservedObject var group: AccountingGroup  // 正確使用 @ObservedObject
     let allItems: [AccountingElementBase]
     
     // 過濾出尚未在群組中的項目

@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 
 struct AnalysisView: View {
-    let group: Group
+    let group: AccountingGroup
     @State private var selectedTimeRange: TimeRange = .oneMonth
     @State private var totalValue: Double = 0.0
     @State private var totalCostValue: Double = 0.0
@@ -514,6 +514,6 @@ struct HistoricalValue: Identifiable {
 
 #Preview {
     NavigationView {
-        AnalysisView(group: Group(name: "測試群組", items: []))
+        AnalysisView(group: AccountingGroup(name: "測試群組", items: []))
     }
 }

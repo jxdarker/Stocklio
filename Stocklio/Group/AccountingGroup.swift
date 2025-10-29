@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-class Group: ObservableObject, Identifiable {
+class AccountingGroup: ObservableObject, Identifiable {
     let id = UUID()
     @Published var name: String
     @Published var items: [AccountingElementBase]
@@ -24,8 +24,8 @@ class Group: ObservableObject, Identifiable {
 }
 
 // 預設群組
-extension Group {
-    static func allItemsGroup(items: [AccountingElementBase]) -> Group {
-        return Group(name: "所有項目", items: items)
+extension AccountingGroup {
+    static func allItemsGroup(items: [AccountingElementBase]) -> AccountingGroup {
+        return AccountingGroup(name: "所有項目", items: items)
     }
 }

@@ -2,13 +2,13 @@ import SwiftUI
 
 struct GroupView: View {
     let items: [AccountingElementBase]  // 所有項目
-    @Binding var groups: [Group]        // 所有群組
+    @Binding var groups: [AccountingGroup]        // 所有群組
     
     @State private var selectedGroupID: UUID?
     @State private var showAddGroupView = false
     
     // 當前選中的群組
-    private var selectedGroup: Group? {
+    private var selectedGroup: AccountingGroup? {
         groups.first { $0.id == selectedGroupID }
     }
     
@@ -41,7 +41,7 @@ struct GroupView: View {
             }
             .sheet(isPresented: $showAddGroupView) {
                 AddGroupView { groupName in
-                    let newGroup = Group(name: groupName)
+                    let newGroup = AccountingGroup(name: groupName)
                     groups.append(newGroup)
                     selectedGroupID = newGroup.id
                 }
@@ -82,7 +82,7 @@ struct GroupView: View {
         .background(Color(.systemGray6))
     }
     
-    private func deleteGroup(_ group: Group) {
+    private func deleteGroup(_ group: AccountingGroup) {
         groups.removeAll { $0.id == group.id }
         // 如果刪除的是當前選中的群組，選擇第一個群組
         if selectedGroupID == group.id {
